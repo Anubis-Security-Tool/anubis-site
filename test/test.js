@@ -8,6 +8,14 @@ import { filterAssets } from '../lib/filter.js'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const root = path.join(here, '..')
+const nginx = fs.readFileSync(path.join(root, 'nginx/nginx.conf'), 'utf8')
+const filterLocation = nginx.match(/location ~ (\S+) \{/)
+assert.ok(filterLocation, 'nginx must route both release feed aliases to the filter')
+const feedPath = new RegExp(filterLocation[1])
+const config = JSON.parse(fs.readFileSync(path.join(root, 'site.config.json'), 'utf8'))
+for (const name of config.releaseFiles) assert.ok(feedPath.test('/data/' + name))
+assert.ok(!feedPath.test('/data/anubis-release.json.extra'))
+assert.match(nginx, /server_name anubis\.locker;\s+return 302 https:\/\/download\.anubis\.locker\$request_uri;/)
 const fx = JSON.parse(fs.readFileSync(path.join(here, 'fixtures/github-slim-release.json'), 'utf8'))
 
 // the fixture is upstream data, so assets carry the upstream prefix

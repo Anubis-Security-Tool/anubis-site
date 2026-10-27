@@ -43,6 +43,11 @@ From CI: run it on the `release: published` payload (or `gh release view --json`
 - Node only: `node bin/serve.js --port 3001`.
 - Cloudflare: `npm run build && npx wrangler deploy` (not run automatically).
 
+The nginx example handles the `?src=` filter on both release-JSON aliases.
+It also redirects the bare `anubis.locker` hostname to the download hub; TLS
+termination must cover that hostname as well as the download/update hosts.
+This is a distribution landing page, not a separate marketing website.
+
 `?src=win-arm64.tar.gz` filters `release.assets` (full name, version-less key, stem, then suffix; `.blockmap` excluded unless requested; no match -> `assets: []`). A filter example does not imply that the current release contains that architecture. The client must be configured with homepage/base `https://update.anubis.locker` and the file name `anubis-github-release.json` (`anubis-release.json` is kept as an identical alias).
 
 Use the independent Node publisher in this repository from the release CI.
