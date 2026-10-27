@@ -1,0 +1,15 @@
+{
+  "productName": "Anubis-Security-Tool",
+  "productId": "anubis",
+  "assetPrefix": "anubis",
+  "siteUrl": "https://download.anubis.locker",
+  "updateUrl": "https://update.anubis.locker",
+  "repoUrl": "https://github.com/Anubis-Security-Tool/anubis",
+  "webRepoUrl": "https://github.com/Anubis-Security-Tool/anubis-web",
+  "docsUrl": "https://docs.anubis.locker",
+  "syncUrl": "https://sync.anubis.locker",
+  "downloadBase": "https://download.anubis.locker/releases",
+  "releaseFiles": ["anubis-release.json", "anubis-github-release.json"],
+  "contentDir": "content",
+  "outDir": "dist"
+}

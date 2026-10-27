@@ -1,0 +1,21 @@
+services:
+  filter:
+    image: node:24-alpine
+    working_dir: /app
+    command: node bin/serve.js --port 3001
+    volumes:
+      - ./:/app:ro
+    expose:
+      - "3001"
+    restart: unless-stopped
+
+  web:
+    image: nginx:1.27-alpine
+    depends_on:
+      - filter
+    ports:
+      - "8080:80"
+    volumes:
+      - ./dist:/usr/share/nginx/html:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    restart: unless-stopped

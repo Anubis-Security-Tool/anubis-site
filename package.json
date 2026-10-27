@@ -1,0 +1,19 @@
+{
+  "name": "@ai-security-tool/anubis-site",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Anubis-Security-Tool/anubis-site.git"
+  },
+  "type": "module",
+  "description": "Static download / update hub for Anubis-Security-Tool (replaces electerm.org distribution role)",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "node bin/build.js",
+    "publish-release": "node bin/publish-release.js",
+    "serve": "node bin/serve.js",
+    "test": "node test/test.js"
+  }
+}
