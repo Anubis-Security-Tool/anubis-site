@@ -48,6 +48,13 @@ It also redirects the bare `anubis.locker` hostname to the download hub; TLS
 termination must cover that hostname as well as the download/update hosts.
 This is a distribution landing page, not a separate marketing website.
 
+Release ingestion preserves SHA-256 `digest` values and an existing
+`windows_machine_host: 1` declaration on the Windows x64 installer. Supply
+that declaration only after actual machine-host installation acceptance;
+the generator does not infer acceptance from a successful build or add the
+flag to raw GitHub metadata. A declaration without a valid digest, or on
+another asset type, is rejected.
+
 `?src=win-arm64.tar.gz` filters `release.assets` (full name, version-less key, stem, then suffix; `.blockmap` excluded unless requested; no match -> `assets: []`). A filter example does not imply that the current release contains that architecture. The client must be configured with homepage/base `https://update.anubis.locker` and the file name `anubis-github-release.json` (`anubis-release.json` is kept as an identical alias).
 
 Use the independent Node publisher in this repository from the release CI.

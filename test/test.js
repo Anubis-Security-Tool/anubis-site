@@ -5,6 +5,7 @@ import path from 'node:path'
 import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { filterAssets } from '../lib/filter.js'
+import { normalizeRelease } from '../lib/release.js'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const root = path.join(here, '..')
@@ -16,6 +17,29 @@ const config = JSON.parse(fs.readFileSync(path.join(root, 'site.config.json'), '
 for (const name of config.releaseFiles) assert.ok(feedPath.test('/data/' + name))
 assert.ok(!feedPath.test('/data/anubis-release.json.extra'))
 assert.match(nginx, /server_name anubis\.locker;\s+return 302 https:\/\/download\.anubis\.locker\$request_uri;/)
+const acceptedAsset = {
+  name: 'anubis-5.7.6-win-x64-installer.exe',
+  browser_download_url: 'https://download.anubis.locker/releases/v5.7.6/anubis-5.7.6-win-x64-installer.exe',
+  size: 12345,
+  digest: 'sha256:' + 'a'.repeat(64),
+  windows_machine_host: 1
+}
+const acceptedRelease = { tag_name: 'v5.7.6', assets: [acceptedAsset] }
+assert.deepEqual(normalizeRelease(acceptedRelease).release.assets[0], acceptedAsset)
+for (const invalid of [
+  { digest: undefined },
+  { digest: 'sha256:invalid' },
+  { windows_machine_host: 0 },
+  { name: 'anubis-5.7.6-linux-amd64.deb' }
+]) {
+  assert.throws(() => normalizeRelease({
+    ...acceptedRelease, assets: [{ ...acceptedAsset, ...invalid }]
+  }), /invalid/)
+}
+assert.equal(normalizeRelease({
+  tag_name: 'v5.7.6',
+  assets: [{ name: 'old.exe', browser_download_url: 'https://example.invalid/old.exe', size: 1, digest: null }]
+}).release.assets[0].digest, undefined)
 const fx = JSON.parse(fs.readFileSync(path.join(here, 'fixtures/github-slim-release.json'), 'utf8'))
 
 // the fixture is upstream data, so assets carry the upstream prefix
@@ -43,6 +67,15 @@ try {
   assert.ok(idx.includes('Anubis-Security-Tool') && idx.includes('Windows'))
   assert.ok(fs.existsSync(path.join(out, 'history.html')))
   assert.ok(fs.existsSync(path.join(out, 'scripts/one-line-web.sh')))
+  const acceptedInput = path.join(work, 'accepted-release.json')
+  fs.writeFileSync(acceptedInput, JSON.stringify(acceptedRelease))
+  execFileSync(process.execPath, [
+    path.join(root, 'bin/publish-release.js'), acceptedInput, '--content', content, '--out', out
+  ], { stdio: 'inherit' })
+  for (const name of config.releaseFiles) {
+    const data = JSON.parse(fs.readFileSync(path.join(out, 'data', name), 'utf8'))
+    assert.deepEqual(data.release.assets, [acceptedAsset])
+  }
   console.log('ok')
 } finally {
   fs.rmSync(work, { recursive: true, force: true })
